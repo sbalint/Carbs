@@ -25,6 +25,7 @@
 		A8B08438BC5010B07A43622A /* CoachEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75690920461EF1532D44D24A /* CoachEngineTests.swift */; };
 		C79D52DEBD44255716555F4B /* CoachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1120B280401239CD2697FB9E /* CoachView.swift */; };
 		C9EA69B72486C431098F16E3 /* CheckInFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA8F438E70D5796C5BF52A5 /* CheckInFlowView.swift */; };
+		CDDCAE06785991DC1D5114A5 /* HealthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50189BC7ADEE448BB51A5007 /* HealthService.swift */; };
 		D46B6A31C2C2182B4300045E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64A83C426F3561A4BF193065 /* SettingsView.swift */; };
 		DBAD2FF16DB60A4179FD5DF0 /* MacroPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051C73FBD3ECBB8A71FF9CC8 /* MacroPlanner.swift */; };
 		EEE434B82A974623DB6CEDB9 /* CoachTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE1829BB5BED1FC187DC61D /* CoachTypes.swift */; };
@@ -47,6 +48,7 @@
 		051C73FBD3ECBB8A71FF9CC8 /* MacroPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroPlanner.swift; sourceTree = "<group>"; };
 		09615A201C81D80F42346CC0 /* FoodDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodDetailView.swift; sourceTree = "<group>"; };
 		0AE1829BB5BED1FC187DC61D /* CoachTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachTypes.swift; sourceTree = "<group>"; };
+		0DD2A5DA861C88F9D9795586 /* Carbs.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Carbs.entitlements; sourceTree = "<group>"; };
 		1120B280401239CD2697FB9E /* CoachView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachView.swift; sourceTree = "<group>"; };
 		12F845CDE02B3B41D4D923C7 /* CarbsTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CarbsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1AA8F438E70D5796C5BF52A5 /* CheckInFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInFlowView.swift; sourceTree = "<group>"; };
@@ -54,6 +56,7 @@
 		352DB5FC1875B7A812DC34E5 /* CarbsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbsApp.swift; sourceTree = "<group>"; };
 		396998FBE2F3EE56BCF91E51 /* DiaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryView.swift; sourceTree = "<group>"; };
 		4AE9E0DA2F2EE1BD4117F0D4 /* CoachEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachEngine.swift; sourceTree = "<group>"; };
+		50189BC7ADEE448BB51A5007 /* HealthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthService.swift; sourceTree = "<group>"; };
 		62D5A7CFF6BAE934F2F03CCD /* FoodSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchService.swift; sourceTree = "<group>"; };
 		64A83C426F3561A4BF193065 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		75690920461EF1532D44D24A /* CoachEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachEngineTests.swift; sourceTree = "<group>"; };
@@ -103,6 +106,7 @@
 			children = (
 				BB337A76948297E3462275A9 /* BarcodeScannerView.swift */,
 				62D5A7CFF6BAE934F2F03CCD /* FoodSearchService.swift */,
+				50189BC7ADEE448BB51A5007 /* HealthService.swift */,
 			);
 			path = Food;
 			sourceTree = "<group>";
@@ -154,6 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				1F99F570A219BEACBEAB8E8F /* Assets.xcassets */,
+				0DD2A5DA861C88F9D9795586 /* Carbs.entitlements */,
 				CAF9400FE48643170E8CB0BC /* Info.plist */,
 				2ABF7D939FE348676FC3DC84 /* App */,
 				F6B22C7B772B33314010E49D /* Coach */,
@@ -338,6 +343,7 @@
 				0F09C91735B0DB5DE8BE7D01 /* EntryViews.swift in Sources */,
 				3055F3768BCDF1351835A859 /* FoodDetailView.swift in Sources */,
 				432C0616CFA10BEA3BD7F867 /* FoodSearchService.swift in Sources */,
+				CDDCAE06785991DC1D5114A5 /* HealthService.swift in Sources */,
 				DBAD2FF16DB60A4179FD5DF0 /* MacroPlanner.swift in Sources */,
 				8B9C88A628AE9979493C2A72 /* MeView.swift in Sources */,
 				36C361465B322B457A1C4776 /* Models.swift in Sources */,
@@ -447,6 +453,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Carbs/Carbs.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -465,6 +472,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Carbs/Carbs.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = NO;

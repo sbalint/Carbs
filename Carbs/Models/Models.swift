@@ -179,6 +179,10 @@ final class CheckIn {
     var title: String = ""
     var message: String = ""
     var note: String?
+    var avgSteps: Double?
+    var usualSteps: Double?
+    var workouts: Int?
+    var activityAdjustment: Int = 0
 
     init(date: Date, periodStart: Date) {
         self.date = date

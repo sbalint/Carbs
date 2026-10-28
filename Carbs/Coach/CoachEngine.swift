@@ -10,7 +10,54 @@ enum CoachEngine {
     /// Changes smaller than this are treated as "on track".
     static let deadBand = 40.0
 
+    /// Activity can move a suggestion by at most this many calories.
+    static let maxActivityAdjustment = 100.0
+    /// Assumed burn of one workout, spread over the week.
+    static let caloriesPerWorkout = 250.0
+    /// Only half the activity difference is used: the weight trend already reflects most of it.
+    static let activityShare = 0.5
+
     static func evaluate(_ input: CoachInput, calendar: Calendar = .current) -> CoachResult {
+        var result = baseEvaluate(input, calendar: calendar)
+        // Nudge only on-target weeks; off-target or missing-data weeks keep their hold.
+        guard result.compliant, result.decision != .matchIntake else { return result }
+        let (nudge, note) = activityAdjustment(input.activity)
+        guard nudge != 0, let note else { return result }
+        let base = Double(result.suggestedCalories)
+        var next = base + Double(nudge)
+        if next < input.calorieFloor { next = base < input.calorieFloor ? base : input.calorieFloor }
+        let applied = Int(next.rounded()) - result.suggestedCalories
+        guard applied != 0 else { return result }
+        result.suggestedCalories += applied
+        result.change += applied
+        result.activityAdjustment = applied
+        result.activityNote = note
+        if result.decision == .hold { result.decision = applied < 0 ? .cut : .raise }
+        result.message += " " + note
+        return result
+    }
+
+    /// Small calorie nudge from steps and workouts compared with your usual.
+    static func activityAdjustment(_ activity: ActivityInput?) -> (Int, String?) {
+        guard let a = activity else { return (0, nil) }
+        var calories = 0.0
+        var parts: [String] = []
+        if let steps = a.avgSteps, let usual = a.baselineSteps, usual > 0 {
+            // Roughly 0.04 Cal per step at 150 lb, scaled by body weight.
+            calories += (steps - usual) * 0.04 * a.weightLb / 150
+            parts.append("\(Int(steps.rounded()).formatted()) steps a day vs your usual \(Int(usual.rounded()).formatted())")
+        }
+        if let workouts = a.workouts, let usual = a.baselineWorkouts {
+            calories += (Double(workouts) - usual) * caloriesPerWorkout / 7
+            parts.append("\(workouts) workout\(workouts == 1 ? "" : "s") vs your usual \(usual.formatted(.number.precision(.fractionLength(0...1))))")
+        }
+        let nudge = (calories * activityShare).clamped(to: -maxActivityAdjustment...maxActivityAdjustment).rounded()
+        guard abs(nudge) >= 10, !parts.isEmpty else { return (0, nil) }
+        let sign = nudge > 0 ? "+" : "−"
+        return (Int(nudge), "Activity: \(parts.joined(separator: " and ")), so \(sign)\(Int(abs(nudge))) Cal.")
+    }
+
+    static func baseEvaluate(_ input: CoachInput, calendar: Calendar = .current) -> CoachResult {
         let start = calendar.startOfDay(for: input.periodStart)
         let checkIn = calendar.startOfDay(for: input.checkInDate)
         let periodDays = max(1, calendar.dateComponents([.day], from: start, to: checkIn).day ?? 7)
@@ -268,4 +315,8 @@ enum CoachEngine {
 
 extension String {
     var capitalizedFirst: String { prefix(1).uppercased() + dropFirst() }
+}
+
+extension Comparable {
+    func clamped(to range: ClosedRange<Self>) -> Self { min(max(self, range.lowerBound), range.upperBound) }
 }

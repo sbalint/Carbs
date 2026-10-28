@@ -9,7 +9,8 @@ struct CheckInFlowView: View {
     let period: Period
     let entries: [FoodEntry]
     let weights: [WeightLog]
-    let lastCheckIn: CheckIn?
+    /// Most recent first; used for your usual number of workouts.
+    let recentCheckIns: [CheckIn]
 
     @State private var step = 1
     @State private var choice: TrackingChoice = .everything
@@ -21,6 +22,14 @@ struct CheckInFlowView: View {
     @State private var plan: MacroPlan?
     @State private var useOwn = false
     @State private var ownCalories: Int?
+    @State private var workouts = 0
+    @State private var steps: (period: Double?, usual: Double?) = (nil, nil)
+    @State private var stepsLoaded = false
+
+    private var usualWorkouts: Double? {
+        let known = recentCheckIns.compactMap(\.workouts)
+        return known.isEmpty ? nil : Double(known.reduce(0, +)) / Double(known.count)
+    }
 
     private var today: Date { Date.now.startOfDay }
     private var todaysLog: WeightLog? { weights.last { $0.date.startOfDay == today } }
@@ -60,6 +69,7 @@ struct CheckInFlowView: View {
             .onAppear {
                 weight = todaysLog?.pounds
                 bodyFat = todaysLog?.bodyFatPct ?? weights.last(where: { $0.bodyFatPct != nil })?.bodyFatPct
+                workouts = Int((usualWorkouts ?? 0).rounded())
             }
         }
     }
@@ -135,7 +145,53 @@ struct CheckInFlowView: View {
             .card()
             Label("Daily weight swings with water, salt and timing. Weighing in most days lets Carbs see the trend.", systemImage: "lightbulb")
                 .font(.caption).foregroundStyle(Theme.secondaryText)
+
+            Text("Your activity").font(.headline).padding(.top, 8)
+            VStack(alignment: .leading, spacing: 12) {
+                Stepper(value: $workouts, in: 0...21) {
+                    HStack {
+                        Text("Workouts this week")
+                        Spacer()
+                        Text("\(workouts)").monospacedDigit().foregroundStyle(Theme.primary)
+                    }
+                }
+                if let usual = usualWorkouts {
+                    Text("Your usual: \(usual.formatted(.number.precision(.fractionLength(0...1)))) a week.")
+                        .font(.caption).foregroundStyle(Theme.secondaryText)
+                }
+                Divider()
+                HStack {
+                    Image(systemName: "figure.walk")
+                    Text("Steps")
+                    Spacer()
+                    if !stepsLoaded {
+                        ProgressView()
+                    } else if let avg = steps.period {
+                        Text("\(Int(avg.rounded()).formatted()) a day").monospacedDigit()
+                    } else {
+                        Text("No data").foregroundStyle(Theme.secondaryText)
+                    }
+                }
+                Text(stepsDetail).font(.caption).foregroundStyle(Theme.secondaryText)
+            }
+            .card()
+            Text("Activity is a small factor: it can move the suggestion by up to \(Int(CoachEngine.maxActivityAdjustment)) Cal, because your weight trend already shows most of what you burn.")
+                .font(.caption).foregroundStyle(Theme.secondaryText)
         }
+        .task {
+            guard !stepsLoaded else { return }
+            await HealthService.shared.requestStepAccess()
+            steps = await HealthService.shared.stepSummary(periodStart: period.start, checkIn: today)
+            stepsLoaded = true
+        }
+    }
+
+    private var stepsDetail: String {
+        if !HealthService.shared.isAvailable { return "Apple Health isn't available on this device." }
+        guard stepsLoaded else { return "Reading Apple Health…" }
+        if steps.period == nil { return "No steps found for this period. Allow Carbs to read Steps in the Health app's Sharing settings." }
+        if let usual = steps.usual { return "Your usual over the 4 weeks before: \(Int(usual.rounded()).formatted()) a day." }
+        return "Carbs needs a week or more of earlier step data to know your usual."
     }
 
     private var reviewStep: some View {
@@ -145,6 +201,8 @@ struct CheckInFlowView: View {
                 row("Tracking", choice == .everything ? "Complete" : choice == .partial ? "Partial" : choice == .otherApp ? "Other app" : "Not tracked")
                 row("Today's weight", weight.map { "\($0.rounded1) lbs" } ?? "—")
                 row("Body fat", bodyFat.map { "\($0.rounded1)%" } ?? "—")
+                row("Workouts", "\(workouts)")
+                row("Steps", steps.period.map { "\(Int($0.rounded()).formatted()) a day" } ?? "—")
                 row("Adjustment style", profile.style.title)
             }
             .card()
@@ -217,7 +275,9 @@ struct CheckInFlowView: View {
             currentCalories: Double(profile.calories), currentProtein: Double(profile.protein),
             goal: profile.goalType, rateLbPerWeek: profile.rateLbPerWeek, style: profile.style,
             calorieFloor: profile.calorieFloor, previousTDEE: profile.tdeeEstimate,
-            compliantStreak: profile.compliantStreak)
+            compliantStreak: profile.compliantStreak,
+            activity: ActivityInput(avgSteps: steps.period, baselineSteps: steps.usual, workouts: workouts,
+                                    baselineWorkouts: usualWorkouts, weightLb: weight ?? profile.startWeight))
         let r = CoachEngine.evaluate(input)
 
         let c = CheckIn(date: .now, periodStart: period.start)
@@ -239,6 +299,10 @@ struct CheckInFlowView: View {
         c.floorApplied = r.floorApplied
         c.title = r.title
         c.message = r.message
+        c.avgSteps = steps.period
+        c.usualSteps = steps.usual
+        c.workouts = workouts
+        c.activityAdjustment = r.activityAdjustment
         draft = c
         plan = macroPlan(for: r.suggestedCalories)
         ownCalories = r.suggestedCalories
@@ -342,6 +406,24 @@ struct CheckInReportView: View {
                 Label(checkIn.compliant ? "You met your targets" : "Targets not met", systemImage: checkIn.compliant ? "star.fill" : "star")
             }
             .card()
+
+            if checkIn.workouts != nil || checkIn.avgSteps != nil {
+                DisclosureGroup {
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let w = checkIn.workouts { Text("\(w) workout\(w == 1 ? "" : "s") this week.") }
+                        if let s = checkIn.avgSteps {
+                            Text("\(Int(s.rounded()).formatted()) steps a day" + (checkIn.usualSteps.map { " (usual \(Int($0.rounded()).formatted()))" } ?? "") + ".")
+                        }
+                        Text(checkIn.activityAdjustment == 0
+                             ? "No activity change to your target this week."
+                             : String(format: "Activity changed your target by %+d Cal.", checkIn.activityAdjustment))
+                    }
+                    .font(.subheadline).foregroundStyle(Theme.secondaryText)
+                } label: {
+                    Label("Your activity", systemImage: "figure.walk")
+                }
+                .card()
+            }
         }
     }
 

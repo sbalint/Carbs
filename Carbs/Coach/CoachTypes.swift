@@ -77,6 +77,19 @@ struct DayIntake: Equatable {
     var protein: Double
 }
 
+/// This period's activity against your usual, for a small nudge to the next target.
+struct ActivityInput: Equatable {
+    /// Average daily steps this period (days with step data only).
+    var avgSteps: Double?
+    /// Average daily steps over the four weeks before the period.
+    var baselineSteps: Double?
+    /// Workouts this period, as answered at check-in.
+    var workouts: Int?
+    /// Average workouts per week from recent check-ins.
+    var baselineWorkouts: Double?
+    var weightLb: Double
+}
+
 struct CoachInput {
     /// First day of the period (inclusive).
     var periodStart: Date
@@ -98,6 +111,7 @@ struct CoachInput {
     var calorieFloor: Double
     var previousTDEE: Double?
     var compliantStreak: Int
+    var activity: ActivityInput? = nil
 }
 
 struct CoachResult: Equatable {
@@ -118,4 +132,7 @@ struct CoachResult: Equatable {
     var floorApplied: Bool
     var title: String
     var message: String
+    /// Calories added (or removed) for activity, already included in `suggestedCalories`.
+    var activityAdjustment: Int = 0
+    var activityNote: String?
 }

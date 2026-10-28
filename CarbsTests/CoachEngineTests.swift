@@ -91,6 +91,49 @@ final class CoachEngineTests: XCTestCase {
         XCTAssertEqual(r.decision, .hold)
     }
 
+    func testMoreActiveWeekNudgesUp() {
+        var input = exampleWeek(style: .gentle)
+        // 2,000 more steps a day and one extra workout than usual, at 236 lb.
+        input.activity = ActivityInput(avgSteps: 9000, baselineSteps: 7000, workouts: 4, baselineWorkouts: 3, weightLb: 220.0)
+        let r = CoachEngine.evaluate(input, calendar: calendar)
+        // Steps: 2000 × 0.04 × 220.0/150 = 125.8; workouts: 250/7 = 35.7; half of 161.5 → +81.
+        XCTAssertEqual(r.activityAdjustment, 81)
+        XCTAssertEqual(r.suggestedCalories, 1860 + 81)
+        XCTAssertNotNil(r.activityNote)
+    }
+
+    func testActivityNudgeIsCapped() {
+        var input = exampleWeek(style: .gentle)
+        input.activity = ActivityInput(avgSteps: 4000, baselineSteps: 12000, workouts: 0, baselineWorkouts: 5, weightLb: 220.0)
+        let r = CoachEngine.evaluate(input, calendar: calendar)
+        XCTAssertEqual(r.activityAdjustment, -100)
+    }
+
+    func testNoBaselineMeansNoNudge() {
+        var input = exampleWeek(style: .gentle)
+        input.activity = ActivityInput(avgSteps: 9000, baselineSteps: nil, workouts: 4, baselineWorkouts: nil, weightLb: 220.0)
+        let r = CoachEngine.evaluate(input, calendar: calendar)
+        XCTAssertEqual(r.activityAdjustment, 0)
+        XCTAssertEqual(r.suggestedCalories, 1860)
+    }
+
+    func testOffTargetWeekIgnoresActivity() {
+        var input = exampleWeek(style: .aggressive, calories: 2100)
+        input.activity = ActivityInput(avgSteps: 9000, baselineSteps: 7000, workouts: 4, baselineWorkouts: 3, weightLb: 220.0)
+        let r = CoachEngine.evaluate(input, calendar: calendar)
+        XCTAssertEqual(r.decision, .hold)
+        XCTAssertEqual(r.suggestedCalories, 2000)
+    }
+
+    func testActivityRespectsFloor() {
+        var input = exampleWeek(style: .aggressive)
+        input.calorieFloor = 1600
+        input.activity = ActivityInput(avgSteps: 4000, baselineSteps: 12000, workouts: nil, baselineWorkouts: nil, weightLb: 220.0)
+        let r = CoachEngine.evaluate(input, calendar: calendar)
+        // 1700 before activity; the −100 nudge stops at the 1600 floor.
+        XCTAssertEqual(r.suggestedCalories, 1600)
+    }
+
     func testThirdCompliantWeekUsesTrend() {
         var input = exampleWeek(style: .gentle)
         input.compliantStreak = 2

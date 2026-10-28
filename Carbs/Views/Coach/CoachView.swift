@@ -30,7 +30,7 @@ struct CoachView: View {
             .navigationTitle("Coach")
             .sheet(isPresented: $checkingIn) {
                 CheckInFlowView(profile: profile, period: period, entries: periodEntries,
-                                weights: weights, lastCheckIn: checkIns.first)
+                                weights: weights, recentCheckIns: Array(checkIns.prefix(4)))
             }
             .sheet(isPresented: $addingWeight) { AddWeightView() }
         }
