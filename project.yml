@@ -31,12 +31,19 @@ targets:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
         FatSecretProxyURL: $(FATSECRET_PROXY_URL)
+        LoopAppGroup: $(LOOP_APP_GROUP)
+        LoopURLScheme: $(LOOP_URL_SCHEME)
+        LSApplicationQueriesSchemes: [$(LOOP_URL_SCHEME)]
         CarbsProxyToken: $(CARBS_PROXY_TOKEN)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sbalint.carbs
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_ENTITLEMENTS: Carbs/Carbs.entitlements
+        # Loop's own App Group (LoopWorkspace default: group.com.<team>.loopkit.LoopGroup).
+        # Change these if your Loop build overrides MAIN_APP_BUNDLE_IDENTIFIER or URL_SCHEME_NAME.
+        LOOP_APP_GROUP: group.com.$(DEVELOPMENT_TEAM).loopkit.LoopGroup
+        LOOP_URL_SCHEME: loop
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

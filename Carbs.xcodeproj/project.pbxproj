@@ -17,6 +17,8 @@
 		432C0616CFA10BEA3BD7F867 /* FoodSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62D5A7CFF6BAE934F2F03CCD /* FoodSearchService.swift */; };
 		48B4527AE38B045FACABE744 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F99F570A219BEACBEAB8E8F /* Assets.xcassets */; };
 		4E9D56D6C675815275EF14FC /* AddFoodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 005EB433338CE6FB2F086457 /* AddFoodView.swift */; };
+		73B09D3665DF99EBE27E5D0C /* LoopMealSuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9291415B149D1D4C92391F0B /* LoopMealSuggestion.swift */; };
+		7D6F0BA84DB38862C27CECC4 /* LoopBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E706E135CB7A23B280163 /* LoopBridgeTests.swift */; };
 		8994E8CCAB3AF2FF1D1A7D1F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB56DD5945DEC1B44009E89D /* Theme.swift */; };
 		8B9C88A628AE9979493C2A72 /* MeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B938D96FDFDFD426834F6E3 /* MeView.swift */; };
 		976942DD46915DCC3DBAD6C1 /* TrendWeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815D786D1C20C7EDB2F71492 /* TrendWeight.swift */; };
@@ -26,6 +28,7 @@
 		C79D52DEBD44255716555F4B /* CoachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1120B280401239CD2697FB9E /* CoachView.swift */; };
 		C9EA69B72486C431098F16E3 /* CheckInFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA8F438E70D5796C5BF52A5 /* CheckInFlowView.swift */; };
 		CDDCAE06785991DC1D5114A5 /* HealthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50189BC7ADEE448BB51A5007 /* HealthService.swift */; };
+		CDF45364430FD6A736FED629 /* LoopBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15DCD0CB3D27F30B0E0261D2 /* LoopBridge.swift */; };
 		D46B6A31C2C2182B4300045E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64A83C426F3561A4BF193065 /* SettingsView.swift */; };
 		DBAD2FF16DB60A4179FD5DF0 /* MacroPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051C73FBD3ECBB8A71FF9CC8 /* MacroPlanner.swift */; };
 		EEE434B82A974623DB6CEDB9 /* CoachTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE1829BB5BED1FC187DC61D /* CoachTypes.swift */; };
@@ -51,6 +54,7 @@
 		0DD2A5DA861C88F9D9795586 /* Carbs.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Carbs.entitlements; sourceTree = "<group>"; };
 		1120B280401239CD2697FB9E /* CoachView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachView.swift; sourceTree = "<group>"; };
 		12F845CDE02B3B41D4D923C7 /* CarbsTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CarbsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		15DCD0CB3D27F30B0E0261D2 /* LoopBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopBridge.swift; sourceTree = "<group>"; };
 		1AA8F438E70D5796C5BF52A5 /* CheckInFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInFlowView.swift; sourceTree = "<group>"; };
 		1F99F570A219BEACBEAB8E8F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		352DB5FC1875B7A812DC34E5 /* CarbsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbsApp.swift; sourceTree = "<group>"; };
@@ -64,9 +68,11 @@
 		767B4E0476308642B7D56F42 /* Absorption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Absorption.swift; sourceTree = "<group>"; };
 		7B938D96FDFDFD426834F6E3 /* MeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeView.swift; sourceTree = "<group>"; };
 		815D786D1C20C7EDB2F71492 /* TrendWeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendWeight.swift; sourceTree = "<group>"; };
+		9291415B149D1D4C92391F0B /* LoopMealSuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopMealSuggestion.swift; sourceTree = "<group>"; };
 		A5BAD078BE0F03A72DFFF1F5 /* Period.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Period.swift; sourceTree = "<group>"; };
 		AA0C25569984AD9F317ADF98 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		AB56DD5945DEC1B44009E89D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		B72E706E135CB7A23B280163 /* LoopBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopBridgeTests.swift; sourceTree = "<group>"; };
 		BB337A76948297E3462275A9 /* BarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerView.swift; sourceTree = "<group>"; };
 		BF7FD2473B80BAEF4304A978 /* DemoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoData.swift; sourceTree = "<group>"; };
 		C49AD261293FEC962510D06D /* EntryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryViews.swift; sourceTree = "<group>"; };
@@ -124,6 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				75690920461EF1532D44D24A /* CoachEngineTests.swift */,
+				B72E706E135CB7A23B280163 /* LoopBridgeTests.swift */,
 			);
 			path = CarbsTests;
 			sourceTree = "<group>";
@@ -173,6 +180,7 @@
 				F6B22C7B772B33314010E49D /* Coach */,
 				22CCAB2D584663D4FCCF40AB /* Config */,
 				42F0F161C69ECEA31E11277E /* Food */,
+				F557A104B91469E85F0E813B /* Loop */,
 				87B8E11A98C0DD4C293FA8C7 /* Models */,
 				F7934983A2783D8C92579EFB /* Theme */,
 				FD951D4D01702FAB11D47B5A /* Views */,
@@ -196,6 +204,15 @@
 				1120B280401239CD2697FB9E /* CoachView.swift */,
 			);
 			path = Coach;
+			sourceTree = "<group>";
+		};
+		F557A104B91469E85F0E813B /* Loop */ = {
+			isa = PBXGroup;
+			children = (
+				15DCD0CB3D27F30B0E0261D2 /* LoopBridge.swift */,
+				9291415B149D1D4C92391F0B /* LoopMealSuggestion.swift */,
+			);
+			path = Loop;
 			sourceTree = "<group>";
 		};
 		F6B22C7B772B33314010E49D /* Coach */ = {
@@ -333,6 +350,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A8B08438BC5010B07A43622A /* CoachEngineTests.swift in Sources */,
+				7D6F0BA84DB38862C27CECC4 /* LoopBridgeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -354,6 +372,8 @@
 				3055F3768BCDF1351835A859 /* FoodDetailView.swift in Sources */,
 				432C0616CFA10BEA3BD7F867 /* FoodSearchService.swift in Sources */,
 				CDDCAE06785991DC1D5114A5 /* HealthService.swift in Sources */,
+				CDF45364430FD6A736FED629 /* LoopBridge.swift in Sources */,
+				73B09D3665DF99EBE27E5D0C /* LoopMealSuggestion.swift in Sources */,
 				DBAD2FF16DB60A4179FD5DF0 /* MacroPlanner.swift in Sources */,
 				8B9C88A628AE9979493C2A72 /* MeView.swift in Sources */,
 				36C361465B322B457A1C4776 /* Models.swift in Sources */,
@@ -473,6 +493,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LOOP_APP_GROUP = "group.com.$(DEVELOPMENT_TEAM).loopkit.LoopGroup";
+				LOOP_URL_SCHEME = loop;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sbalint.carbs;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -493,6 +515,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LOOP_APP_GROUP = "group.com.$(DEVELOPMENT_TEAM).loopkit.LoopGroup";
+				LOOP_URL_SCHEME = loop;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sbalint.carbs;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;

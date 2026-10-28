@@ -7,8 +7,20 @@ struct CarbsApp: App {
         WindowGroup {
             RootView()
         }
-        .modelContainer(for: [Profile.self, Food.self, FoodEntry.self, WeightLog.self, CheckIn.self])
+        .modelContainer(Self.container)
     }
+
+    /// Kept in Carbs' own container. With an App Group entitlement (for Loop), SwiftData would
+    /// otherwise default to the shared group container and the existing diary would seem to vanish.
+    static let container: ModelContainer = {
+        let schema = Schema([Profile.self, Food.self, FoodEntry.self, WeightLog.self, CheckIn.self])
+        let configuration = ModelConfiguration(schema: schema, groupContainer: .none)
+        do {
+            return try ModelContainer(for: schema, configurations: configuration)
+        } catch {
+            fatalError("Could not open the Carbs database: \(error)")
+        }
+    }()
 }
 
 struct RootView: View {

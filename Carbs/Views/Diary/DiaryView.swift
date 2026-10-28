@@ -55,9 +55,13 @@ struct DayDiary: View {
     @Environment(\.modelContext) private var context
     @Bindable var profile: Profile
     let date: Date
+    @Environment(\.scenePhase) private var scenePhase
     @Query private var entries: [FoodEntry]
     @State private var sheet: DiarySheet?
     @State private var showRemaining = false
+    /// Pending Loop suggestions by meal group, refreshed whenever the diary changes.
+    @State private var loopSuggestions: [String: LoopMealSuggestion] = [:]
+    @State private var loopError: String?
 
     init(profile: Profile, date: Date) {
         self.profile = profile
@@ -81,6 +85,14 @@ struct DayDiary: View {
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
+        .onAppear(perform: syncLoop)
+        .onChange(of: loopSignature) { syncLoop() }
+        .onChange(of: scenePhase) { if scenePhase == .active { syncLoop() } }
+        .alert("Couldn't open Loop", isPresented: Binding(get: { loopError != nil }, set: { if !$0 { loopError = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(loopError ?? "")
+        }
         .sheet(item: $sheet) { sheet in
             switch sheet {
             case .add(let meal):
@@ -105,7 +117,9 @@ struct DayDiary: View {
             .onDelete { offsets in
                 for i in offsets { context.delete(items[i]) }
             }
-            if items.count > 1, t.carbs > 0 {
+            if LoopBridge.isAvailable {
+                loopRow(items: items)
+            } else if items.count > 1, t.carbs > 0 {
                 let minutes = Absorption.suggestedMinutes(carbs: t.carbs, protein: t.protein, fat: t.fat)
                 Label("Meal: \(t.carbs.rounded0) g carbs · \(Absorption.kind(minutes).lowercased()) absorption (\(Absorption.label(minutes)))",
                       systemImage: "timer")
@@ -136,6 +150,63 @@ struct DayDiary: View {
         }
     }
 
+    // MARK: Loop
+
+    /// Changes whenever anything Loop cares about changes.
+    private var loopSignature: String {
+        entries.map { "\($0.id)\($0.carbs)\($0.timestamp.timeIntervalSince1970)\($0.absorptionMinutes)\($0.meal)\($0.loopStatusRaw)" }
+            .joined(separator: ",")
+    }
+
+    private func syncLoop() {
+        loopSuggestions = LoopBridge.sync(context: context, mealNames: profile.mealNames)
+    }
+
+    /// Where this meal stands with Loop, with a button to open it there.
+    @ViewBuilder
+    private func loopRow(items: [FoodEntry]) -> some View {
+        let carbItems = items.filter { $0.carbs >= 1 }
+        if !carbItems.isEmpty {
+            let key = LoopBridge.groupKey(for: carbItems[0])
+            if let suggestion = loopSuggestions[key] {
+                HStack {
+                    Label("\(suggestion.carbs.rounded0) g carbs · \(Absorption.label(suggestion.absorptionMinutes)) · \(suggestion.startDate.formatted(date: .omitted, time: .shortened))",
+                          systemImage: "arrow.up.forward.app")
+                        .font(.caption)
+                        .foregroundStyle(Theme.secondaryText)
+                    Spacer()
+                    Button("Send to Loop") {
+                        Task {
+                            if !(await LoopBridge.open(suggestion)) {
+                                loopError = "Loop isn't installed, or it was built without the Carbs changes."
+                            }
+                        }
+                    }
+                    .font(.caption.weight(.semibold))
+                    .buttonStyle(.borderless)
+                }
+            } else if carbItems.allSatisfy({ $0.loopStatus == .accepted || $0.loopStatus == .dismissed }) {
+                HStack {
+                    Label(carbItems.contains { $0.loopStatus == .accepted } ? "Reviewed in Loop" : "Dismissed in Loop",
+                          systemImage: carbItems.contains { $0.loopStatus == .accepted } ? "checkmark.circle" : "xmark.circle")
+                        .font(.caption)
+                        .foregroundStyle(Theme.secondaryText)
+                    Spacer()
+                    Button("Send again") {
+                        LoopBridge.resend(carbItems, context: context, mealNames: profile.mealNames)
+                        syncLoop()
+                    }
+                    .font(.caption.weight(.semibold))
+                    .buttonStyle(.borderless)
+                }
+            } else if carbItems.contains(where: { $0.timestamp < .now - LoopBridge.offerWindow }) {
+                Label("Too old to offer to Loop", systemImage: "clock")
+                    .font(.caption)
+                    .foregroundStyle(Theme.secondaryText)
+            }
+        }
+    }
+
     private func copyToToday(_ items: [FoodEntry]) {
         let calendar = Calendar.current
         let today = Date.now.startOfDay
@@ -147,6 +218,7 @@ struct DayDiary: View {
                                  carbs: e.carbs, fat: e.fat, fiber: e.fiber, food: e.food, isQuickAdd: e.isQuickAdd)
             copy.absorptionMinutes = e.absorptionMinutes
             copy.absorptionIsManual = e.absorptionIsManual
+            copy.loopStatus = copy.carbs >= 1 ? .pending : .none
             context.insert(copy)
         }
     }

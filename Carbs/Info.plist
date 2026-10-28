@@ -24,6 +24,14 @@
 	<string>$(CARBS_PROXY_TOKEN)</string>
 	<key>FatSecretProxyURL</key>
 	<string>$(FATSECRET_PROXY_URL)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>$(LOOP_URL_SCHEME)</string>
+	</array>
+	<key>LoopAppGroup</key>
+	<string>$(LOOP_APP_GROUP)</string>
+	<key>LoopURLScheme</key>
+	<string>$(LOOP_URL_SCHEME)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

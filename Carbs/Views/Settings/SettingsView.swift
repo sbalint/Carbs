@@ -107,9 +107,14 @@ struct SettingsView: View {
                     Text("Optional. The built-in demo key allows about 30 searches an hour. A free key from api.data.gov raises that to 1,000.")
                 }
 
-                Section("Loop") {
-                    Text("Food entries keep their time and absorption, ready for Loop to offer as suggestions. The Loop connection comes in a later version; nothing is sent to Loop or Apple Health yet.")
+                Section {
+                    LabeledContent("Status", value: LoopBridge.isAvailable ? "Connected" : "Not set up")
+                    Text(LoopBridge.isAvailable
+                         ? "Meals with carbs from the last 6 hours are offered to Loop, one per meal, with their time and absorption. Loop asks before adding anything: each meal opens Loop's own carb entry screen for you to check, and you bolus there as usual. Carbs never writes carbs to Apple Health."
+                         : "This build can't reach Loop's shared folder. Build Carbs with the same Apple team as your Loop build.")
                         .font(.footnote).foregroundStyle(Theme.secondaryText)
+                } header: {
+                    Text("Loop")
                 }
             }
             .keyboardDoneButton()
