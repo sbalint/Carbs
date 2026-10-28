@@ -19,19 +19,19 @@ enum DemoData {
         let profile = Profile()
         profile.goalStartDate = today.adding(days: -6)
         profile.startWeight = 228.0
-        profile.goalWeight = 215
+        profile.goalWeight = 200
         profile.rateLbPerWeek = 2.5
         profile.checkInWeekday = Calendar.current.component(.weekday, from: today.adding(days: 1))
-        profile.calories = 1860
+        profile.calories = 2000
         profile.tdeeEstimate = 2600
-        profile.proteinPerLbLBM = 1.13
-        profile.replanMacros(weightLb: 220.0, bodyFatPct: 25.0)
+        profile.proteinPerLbLBM = 1.1
+        profile.replanMacros(weightLb: 220, bodyFatPct: 25)
         context.insert(profile)
 
         for d in 0..<21 {
-            let w = 238.5 - Double(d) * 0.13 + (d % 3 == 0 ? 0.6 : d % 3 == 1 ? -0.3 : 0)
+            let w = 222.5 - Double(d) * 0.13 + (d % 3 == 0 ? 0.6 : d % 3 == 1 ? -0.3 : 0)
             context.insert(WeightLog(date: today.adding(days: -20 + d).addingTimeInterval(7 * 3600), pounds: w,
-                                     bodyFatPct: d == 20 ? 25.0 : nil))
+                                     bodyFatPct: d == 20 ? 25 : nil))
         }
 
         let shake = Food(name: "Protein Isolate", brand: "Demo", caloriesPer100g: 375, proteinPer100g: 75,

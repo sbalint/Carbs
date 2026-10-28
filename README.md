@@ -7,12 +7,12 @@ A personal iOS app for meal tracking and weight management, with weekly coaching
 - Weekly check-ins that suggest a new calorie target you can accept or override
 - Confirm-only carb suggestions for Loop
 
-
+Built for personal use.
 
 ## Build
 
 1. Open `Carbs.xcodeproj` in Xcode (or regenerate it with `xcodegen generate` after editing `project.yml`).
-2. Pick your iPhone as the run destination and press Run. Signing uses your paid team (W8BGT53U8Q).
+2. Set `DEVELOPMENT_TEAM` in `project.yml` to your own Apple team, run `xcodegen generate`, pick your iPhone and press Run.
 3. Tests: `xcodebuild -project Carbs.xcodeproj -scheme Carbs -destination 'platform=iOS Simulator,name=iPhone 18 Pro' test`
 
 Debug builds accept `-demo` (sample data) and `-tab N` launch arguments for Simulator screenshots.

@@ -199,7 +199,7 @@ enum CoachEngine {
 
     // MARK: - Pieces
 
-    /// Target ±3%, with rounded bounds (2000 → 1840–1954, 196 g → 190–202 g).
+    /// Target ±3%, with rounded bounds (2000 → 1940–2060, 180 g → 175–185 g).
     static func complianceRange(_ target: Double) -> ClosedRange<Double> {
         (target * (1 - complianceBand)).rounded()...(target * (1 + complianceBand)).rounded()
     }
