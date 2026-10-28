@@ -98,12 +98,6 @@ for frac, length in [(0.30, 70), (0.52, 120), (0.74, 85), (0.93, 60)]:
     d.rectangle([x - w, y, x + w, y + length], fill=ganache)
     d.ellipse([x - w, y + length - w, x + w, y + length + w], fill=ganache)
 
-# Cherry on the frosted top, near the back.
-ch_x, ch_y, ch_r = (A[0] + A2[0]) / 2 - 20, (A[1] + A2[1]) / 2 - 62, 74
-d.line([(ch_x + 12, ch_y - ch_r + 12), (ch_x + 80, ch_y - ch_r - 95)], fill=(0x3E, 0x7D, 0x2E, 255), width=16)
-d.ellipse([ch_x - ch_r, ch_y - ch_r, ch_x + ch_r, ch_y + ch_r], fill=(0xE2, 0x2B, 0x3A, 255))
-d.ellipse([ch_x - 42, ch_y - 46, ch_x - 10, ch_y - 14], fill=(255, 255, 255, 200))
-
 cake_shadow = layer.split()[3].filter(ImageFilter.GaussianBlur(24))
 icon.paste((0x08, 0x0C, 0x18), (0, 18), cake_shadow.point(lambda v: int(v * 0.45)))
 icon.paste(layer, (0, 0), layer)
