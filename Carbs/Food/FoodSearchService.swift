@@ -16,7 +16,13 @@ struct FoodResult: Identifiable, Hashable {
     var sugarPer100g: Double
     var servings: [ServingOption]
 
-    var sourceLabel: String { source == "usda" ? "USDA" : "Open Food Facts" }
+    var sourceLabel: String {
+        switch source {
+        case "fatsecret": "FatSecret"
+        case "usda": "USDA"
+        default: "Open Food Facts"
+        }
+    }
 
     func makeFood() -> Food {
         Food(name: name, brand: brand, source: source, sourceID: sourceID, barcode: barcode,
@@ -25,9 +31,25 @@ struct FoodResult: Identifiable, Hashable {
     }
 }
 
-/// Free food databases: USDA FoodData Central (generic and branded foods) and Open Food Facts (barcodes).
+/// The Carbs Cloudflare Worker that holds the FatSecret secret (see server/fatsecret-proxy).
+struct FatSecretProxy {
+    var baseURL: URL
+    var token: String
+
+    /// From Info.plist, filled in from Config/Secrets.xcconfig at build time.
+    static var configured: FatSecretProxy? {
+        let info = Bundle.main.infoDictionary ?? [:]
+        guard let raw = info["FatSecretProxyURL"] as? String, !raw.isEmpty, !raw.contains("$("),
+              let url = URL(string: raw), url.host != nil,
+              let token = info["CarbsProxyToken"] as? String, !token.isEmpty, !token.contains("$(") else { return nil }
+        return FatSecretProxy(baseURL: url, token: token)
+    }
+}
+
+/// Food databases: FatSecret (through the Carbs Worker), USDA FoodData Central and Open Food Facts (barcodes).
 struct FoodSearchService {
     var usdaKey: String
+    var fatSecret: FatSecretProxy? = .configured
     var session: URLSession = .shared
 
     private let userAgent = "Carbs/0.1 (personal iOS app)"
@@ -35,16 +57,45 @@ struct FoodSearchService {
     func search(_ query: String) async -> [FoodResult] {
         let trimmed = query.trimmingCharacters(in: .whitespaces)
         guard trimmed.count >= 2 else { return [] }
+        async let fs = (try? searchFatSecret(trimmed)) ?? []
         async let usda = (try? searchUSDA(trimmed)) ?? []
         async let off = (try? searchOpenFoodFacts(trimmed)) ?? []
-        let (a, b) = await (usda, off)
-        // Interleave so both sources show near the top.
-        var merged: [FoodResult] = []
+        let (f, a, b) = await (fs, usda, off)
+        // FatSecret first, then the free databases interleaved.
+        var merged = f
         for i in 0..<max(a.count, b.count) {
             if i < a.count { merged.append(a[i]) }
             if i < b.count { merged.append(b[i]) }
         }
         return merged
+    }
+
+    // MARK: FatSecret
+
+    func searchFatSecret(_ query: String) async throws -> [FoodResult] {
+        guard let proxy = fatSecret else { return [] }
+        var components = URLComponents(url: proxy.baseURL.appending(path: "search"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [URLQueryItem(name: "q", value: query)]
+        var request = URLRequest(url: components.url!, timeoutInterval: 20)
+        request.setValue(proxy.token, forHTTPHeaderField: "X-Carbs-Token")
+        let (data, response) = try await session.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+        return (json["foods"] as? [[String: Any]] ?? []).compactMap(parseFatSecret)
+    }
+
+    func parseFatSecret(_ f: [String: Any]) -> FoodResult? {
+        guard let id = f["id"] as? String, let name = f["name"] as? String,
+              let per = f["per100g"] as? [String: Any] else { return nil }
+        func value(_ key: String) -> Double { number(per[key]) ?? 0 }
+        let servings = (f["servings"] as? [[String: Any]] ?? []).compactMap { s -> ServingOption? in
+            guard let name = s["name"] as? String, let grams = number(s["grams"]), grams > 0 else { return nil }
+            return ServingOption(name: name, grams: grams)
+        }
+        return FoodResult(name: name, brand: f["brand"] as? String, source: "fatsecret", sourceID: id, barcode: nil,
+                          caloriesPer100g: value("calories"), proteinPer100g: value("protein"),
+                          carbsPer100g: value("carbs"), fatPer100g: value("fat"),
+                          fiberPer100g: value("fiber"), sugarPer100g: value("sugar"), servings: servings)
     }
 
     func lookup(barcode: String) async -> FoodResult? {

@@ -1,0 +1,8 @@
+name = "carbs-fatsecret"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# Secrets (set with `npx wrangler secret put NAME`, never committed):
+#   FATSECRET_KEY     FatSecret OAuth 1.0 Consumer Key
+#   FATSECRET_SECRET  FatSecret OAuth 1.0 Consumer Secret
+#   APP_TOKEN         shared password the Carbs app sends as X-Carbs-Token

@@ -14,7 +14,12 @@ targets:
   Carbs:
     type: application
     platform: iOS
-    sources: [Carbs]
+    sources:
+      - path: Carbs
+        excludes: ["Config/*.xcconfig"]
+    configFiles:
+      Debug: Carbs/Config/Secrets.xcconfig
+      Release: Carbs/Config/Secrets.xcconfig
     info:
       path: Carbs/Info.plist
       properties:
@@ -23,6 +28,10 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSCameraUsageDescription: Carbs uses the camera to scan food barcodes.
         NSHealthShareUsageDescription: Carbs reads your step count to fine-tune weekly calorie suggestions.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        FatSecretProxyURL: $(FATSECRET_PROXY_URL)
+        CarbsProxyToken: $(CARBS_PROXY_TOKEN)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sbalint.carbs

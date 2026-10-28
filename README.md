@@ -27,3 +27,15 @@ See `Carbs/Coach/CoachEngine.swift`. Each check-in:
 - suggests a target that moves toward your goal rate by at most 7% (Gentle) or 15% (Aggressive), never below your calorie floor.
 
 You can accept the suggestion or set your own number.
+
+## FatSecret (via Cloudflare Worker)
+
+`server/fatsecret-proxy` holds the FatSecret OAuth 1.0 secret and returns foods with servings.
+
+1. `cd server/fatsecret-proxy && npm install`
+2. `npx wrangler login`, then set secrets: `npx wrangler secret put FATSECRET_KEY` (and `FATSECRET_SECRET`, `APP_TOKEN`)
+3. `npx wrangler deploy`
+4. Copy `Carbs/Config/Secrets.example.xcconfig` to `Secrets.xcconfig` and fill in the Worker URL and `APP_TOKEN`.
+
+For local testing, put the same three values in `server/fatsecret-proxy/.dev.vars` and run `npx wrangler dev`.
+Neither `Secrets.xcconfig` nor `.dev.vars` is committed. Without them, search uses USDA and Open Food Facts only.

@@ -55,6 +55,7 @@
 		1F99F570A219BEACBEAB8E8F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		352DB5FC1875B7A812DC34E5 /* CarbsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbsApp.swift; sourceTree = "<group>"; };
 		396998FBE2F3EE56BCF91E51 /* DiaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryView.swift; sourceTree = "<group>"; };
+		47F825EA2C6AB8E89B5B669D /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		4AE9E0DA2F2EE1BD4117F0D4 /* CoachEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachEngine.swift; sourceTree = "<group>"; };
 		50189BC7ADEE448BB51A5007 /* HealthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthService.swift; sourceTree = "<group>"; };
 		62D5A7CFF6BAE934F2F03CCD /* FoodSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchService.swift; sourceTree = "<group>"; };
@@ -75,6 +76,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		22CCAB2D584663D4FCCF40AB /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				47F825EA2C6AB8E89B5B669D /* Secrets.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		2ABF7D939FE348676FC3DC84 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -162,6 +171,7 @@
 				CAF9400FE48643170E8CB0BC /* Info.plist */,
 				2ABF7D939FE348676FC3DC84 /* App */,
 				F6B22C7B772B33314010E49D /* Coach */,
+				22CCAB2D584663D4FCCF40AB /* Config */,
 				42F0F161C69ECEA31E11277E /* Food */,
 				87B8E11A98C0DD4C293FA8C7 /* Models */,
 				F7934983A2783D8C92579EFB /* Theme */,
@@ -451,6 +461,7 @@
 		};
 		4EF4483D68858D9EC9911E2D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 47F825EA2C6AB8E89B5B669D /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Carbs/Carbs.entitlements;
@@ -470,6 +481,7 @@
 		};
 		68B4AD1652F7FE22B0064BCC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 47F825EA2C6AB8E89B5B669D /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Carbs/Carbs.entitlements;

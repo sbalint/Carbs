@@ -78,7 +78,13 @@ struct AddFoodView: View {
                                     .foregroundStyle(Theme.secondaryText)
                             }
                         } header: {
-                            Text("USDA and Open Food Facts")
+                            Text(FatSecretProxy.configured == nil ? "USDA and Open Food Facts" : "FatSecret, USDA and Open Food Facts")
+                        } footer: {
+                            if FatSecretProxy.configured != nil, results.contains(where: { $0.source == "fatsecret" }) {
+                                // Attribution required by FatSecret's free (Basic) API tier.
+                                Link("Powered by FatSecret", destination: URL(string: "https://www.fatsecret.com")!)
+                                    .font(.caption)
+                            }
                         }
                     }
                 }

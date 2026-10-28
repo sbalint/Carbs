@@ -20,6 +20,15 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>CarbsProxyToken</key>
+	<string>$(CARBS_PROXY_TOKEN)</string>
+	<key>FatSecretProxyURL</key>
+	<string>$(FATSECRET_PROXY_URL)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Carbs uses the camera to scan food barcodes.</string>
 	<key>NSHealthShareUsageDescription</key>

@@ -5,3 +5,7 @@ build/
 *.xcuserstate
 *.ipa
 Secrets.xcconfig
+server/**/.dev.vars
+server/**/node_modules/
+server/**/.wrangler/
+Carbs/Config/Secrets.xcconfig
