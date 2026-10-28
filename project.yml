@@ -1,0 +1,49 @@
+name: Carbs
+options:
+  bundleIdPrefix: com.sbalint
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    DEVELOPMENT_TEAM: W8BGT53U8Q
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  Carbs:
+    type: application
+    platform: iOS
+    sources: [Carbs]
+    info:
+      path: Carbs/Info.plist
+      properties:
+        CFBundleDisplayName: Carbs
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSCameraUsageDescription: Carbs uses the camera to scan food barcodes.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sbalint.carbs
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  CarbsTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [CarbsTests]
+    dependencies:
+      - target: Carbs
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sbalint.carbs.tests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Carbs:
+    build:
+      targets:
+        Carbs: all
+        CarbsTests: [test]
+    test:
+      targets: [CarbsTests]
