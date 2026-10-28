@@ -48,6 +48,20 @@ struct CardModifier: ViewModifier {
 extension View {
     func card() -> some View { modifier(CardModifier()) }
 
+    /// Number pads have no return key, so add a Done button and let scrolling close the keyboard.
+    func keyboardDoneButton() -> some View {
+        scrollDismissesKeyboard(.interactively)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+    }
+
     func screenBackground() -> some View {
         background(Theme.background.ignoresSafeArea())
     }

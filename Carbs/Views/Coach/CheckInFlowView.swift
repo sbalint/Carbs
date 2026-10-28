@@ -44,10 +44,13 @@ struct CheckInFlowView: View {
             }
             .screenBackground()
             .safeAreaInset(edge: .bottom) { bottomButton.padding() }
+            .keyboardDoneButton()
             .navigationTitle("Check In")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { dismiss() } label: { Image(systemName: "xmark") }
+                }
                 if step > 1 && step <= 3 {
                     ToolbarItem(placement: .topBarLeading) {
                         Button { step -= 1 } label: { Image(systemName: "chevron.left") }

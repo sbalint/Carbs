@@ -156,6 +156,7 @@ struct AddWeightView: View {
                 numberField("Weight (lb)", $pounds)
                 numberField("Body fat % (optional)", $bodyFat)
             }
+            .keyboardDoneButton()
             .navigationTitle("Add weight")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

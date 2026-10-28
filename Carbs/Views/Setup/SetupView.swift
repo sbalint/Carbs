@@ -59,6 +59,7 @@ struct SetupView: View {
                         .listRowInsets(EdgeInsets())
                 }
             }
+            .keyboardDoneButton()
             .navigationTitle("Welcome to Carbs")
         }
     }

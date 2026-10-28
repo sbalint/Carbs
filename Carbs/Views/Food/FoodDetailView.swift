@@ -124,6 +124,7 @@ struct FoodDetailView: View {
             .padding()
         }
         .screenBackground()
+        .keyboardDoneButton()
         .navigationBarTitleDisplayMode(.inline)
         .onAppear(perform: load)
         .onChange(of: grams) {
@@ -180,10 +181,16 @@ struct AbsorptionPicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Picker("Absorption time", selection: Binding(get: { minutes }, set: { minutes = $0; manual = $0 != suggested })) {
-                ForEach(Array(Set(Absorption.choices + [suggested, minutes])).sorted(), id: \.self) {
-                    Text(Absorption.label($0)).tag($0)
+            // An explicit label row: outside a Form the menu picker hides its title.
+            HStack {
+                Text("Absorption time")
+                Spacer()
+                Picker("Absorption time", selection: Binding(get: { minutes }, set: { minutes = $0; manual = $0 != suggested })) {
+                    ForEach(Array(Set(Absorption.choices + [suggested, minutes])).sorted(), id: \.self) {
+                        Text(Absorption.label($0)).tag($0)
+                    }
                 }
+                .labelsHidden()
             }
             Text(manual
                  ? "Suggested: \(Absorption.label(suggested)) (\(Absorption.kind(suggested).lowercased())). Tap to change back."

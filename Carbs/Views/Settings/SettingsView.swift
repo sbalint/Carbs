@@ -112,6 +112,7 @@ struct SettingsView: View {
                         .font(.footnote).foregroundStyle(Theme.secondaryText)
                 }
             }
+            .keyboardDoneButton()
             .navigationTitle("Settings")
         }
     }

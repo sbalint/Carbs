@@ -55,6 +55,7 @@ struct EntryEditView: View {
                     }
                 }
             }
+            .keyboardDoneButton()
             .navigationTitle(entry.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -128,6 +129,7 @@ struct QuickAddView: View {
                                      suggested: Absorption.suggestedMinutes(carbs: carbs ?? 0, protein: protein ?? 0, fat: fat ?? 0))
                 }
             }
+            .keyboardDoneButton()
             .navigationTitle("Quick add")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -194,6 +196,7 @@ struct CreateFoodView: View {
                     numberField("Fat (g)", $fat)
                 }
             }
+            .keyboardDoneButton()
             .navigationTitle("Create food")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

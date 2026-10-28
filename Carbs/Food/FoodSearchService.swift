@@ -82,7 +82,10 @@ struct FoodSearchService {
         var servings: [ServingOption] = []
         if let size = f["servingSize"] as? Double, let unit = (f["servingSizeUnit"] as? String)?.lowercased(),
            unit == "g" || unit == "grm" || unit == "ml" || unit == "mlt" {
-            let label = (f["householdServingFullText"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? "serving"
+            // "1 CONTAINER" → "container", so the diary reads "1 container (150g)" not "1 1 CONTAINER".
+            var label = (f["householdServingFullText"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? "serving"
+            if label.hasPrefix("1 ") { label = String(label.dropFirst(2)) }
+            if label == label.uppercased() { label = label.lowercased() }
             servings.append(ServingOption(name: "\(label) (\(size.clean)\(unit.hasPrefix("m") ? "ml" : "g"))", grams: size))
         }
         for m in (f["foodMeasures"] as? [[String: Any]] ?? []).prefix(6) {
