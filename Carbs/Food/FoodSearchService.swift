@@ -101,16 +101,14 @@ struct FoodSearchService {
     // MARK: Open Food Facts
 
     func searchOpenFoodFacts(_ query: String) async throws -> [FoodResult] {
-        var components = URLComponents(string: "https://world.openfoodfacts.org/cgi/search.pl")!
+        var components = URLComponents(string: "https://search.openfoodfacts.org/search")!
         components.queryItems = [
-            URLQueryItem(name: "search_terms", value: query),
-            URLQueryItem(name: "search_simple", value: "1"),
-            URLQueryItem(name: "json", value: "1"),
+            URLQueryItem(name: "q", value: query),
             URLQueryItem(name: "page_size", value: "20"),
             URLQueryItem(name: "fields", value: "code,product_name,brands,nutriments,serving_size,serving_quantity"),
         ]
         let json = try await fetch(components.url!)
-        let products = json["products"] as? [[String: Any]] ?? []
+        let products = json["hits"] as? [[String: Any]] ?? []
         return products.compactMap(parseOpenFoodFacts)
     }
 
@@ -133,7 +131,9 @@ struct FoodSearchService {
             let label = (p["serving_size"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? "\(grams.clean) g"
             servings.append(ServingOption(name: "serving (\(label))", grams: grams))
         }
-        let brand = (p["brands"] as? String)?.split(separator: ",").first.map { String($0).trimmingCharacters(in: .whitespaces) }
+        // The product API gives brands as "A, B"; the search service gives ["A", "B"].
+        let brand = (p["brands"] as? [String])?.first
+            ?? (p["brands"] as? String)?.split(separator: ",").first.map { String($0).trimmingCharacters(in: .whitespaces) }
         return FoodResult(name: name, brand: brand, source: "openfoodfacts", sourceID: code, barcode: code,
                           caloriesPer100g: calories, proteinPer100g: protein, carbsPer100g: carbs, fatPer100g: fat,
                           fiberPer100g: value("fiber_100g") ?? 0, sugarPer100g: value("sugars_100g") ?? 0, servings: servings)
