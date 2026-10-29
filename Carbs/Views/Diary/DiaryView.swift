@@ -105,6 +105,9 @@ struct DayDiary: View {
             .onDelete { offsets in
                 for i in offsets { context.delete(items[i]) }
             }
+            if Calendar.current.isDateInToday(date) {
+                MealSuggestionRows(meal: index, date: date, logged: items)
+            }
             if items.count > 1, t.carbs > 0 {
                 let minutes = Absorption.suggestedMinutes(carbs: t.carbs, protein: t.protein, fat: t.fat)
                 Label("Meal: \(t.carbs.rounded0) g carbs · \(Absorption.kind(minutes).lowercased()) absorption (\(Absorption.label(minutes)))",

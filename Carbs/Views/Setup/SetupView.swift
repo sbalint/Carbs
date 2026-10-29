@@ -15,8 +15,28 @@ struct SetupView: View {
     @State private var checkInWeekday = 4
     @State private var style: AdjustmentStyle = .aggressive
     @State private var floor: Double = 1500
+    @State private var sex: Sex?
+    @State private var age: Int?
+    @State private var heightFeet: Int?
+    @State private var heightInches: Int?
+    @State private var activity: ActivityLevel = .light
 
-    private var canSave: Bool { weight != nil && calories != nil && (goal == .maintain || goalWeight != nil) }
+    private var heightIn: Double? {
+        guard let heightFeet else { return nil }
+        return Double(heightFeet * 12 + (heightInches ?? 0))
+    }
+    /// Maintenance from body stats, once they're filled in.
+    private var estimatedMaintenance: Int? {
+        guard let weight, let heightIn, let age, let sex else { return nil }
+        return Maintenance.estimate(weightLb: weight, heightIn: heightIn, age: age, sex: sex, activity: activity, bodyFatPct: bodyFat)
+    }
+    private var effectiveMaintenance: Int? { maintenance ?? estimatedMaintenance }
+    private var suggestedCalories: Int? {
+        effectiveMaintenance.map { Maintenance.goalCalories(maintenance: Double($0), goal: goal, rateLbPerWeek: rate, floor: floor) }
+    }
+    private var effectiveCalories: Int? { calories ?? suggestedCalories }
+
+    private var canSave: Bool { weight != nil && effectiveCalories != nil && (goal == .maintain || goalWeight != nil) }
 
     var body: some View {
         NavigationStack {
@@ -37,12 +57,32 @@ struct SetupView: View {
                     }
                 }
                 Section {
-                    intRow("Daily calories now", value: $calories)
-                    intRow("Maintenance (optional)", value: $maintenance)
+                    Picker("Sex", selection: $sex) {
+                        ForEach(Sex.allCases) { Text($0.title).tag(Sex?.some($0)) }
+                    }
+                    .pickerStyle(.segmented)
+                    intRow("Age", value: $age, unit: "yr")
+                    HStack {
+                        Text("Height")
+                        Spacer()
+                        smallField(value: $heightFeet)
+                        Text("ft").foregroundStyle(Theme.secondaryText)
+                        smallField(value: $heightInches)
+                        Text("in").foregroundStyle(Theme.secondaryText)
+                    }
+                    ActivityPicker(activity: $activity)
+                } header: {
+                    Text("About you")
+                } footer: {
+                    Text("Used to estimate your maintenance calories.")
+                }
+                Section {
+                    intRow("Maintenance", value: $maintenance, placeholder: estimatedMaintenance)
+                    intRow("Daily calories", value: $calories, placeholder: suggestedCalories)
                 } header: {
                     Text("Starting calories")
                 } footer: {
-                    Text("Use your current calorie target and maintenance estimate from another app if you have them. Carbs refines the estimate from your logs every week.")
+                    Text(caloriesFooter)
                 }
                 Section {
                     WeekdayPicker(weekday: $checkInWeekday)
@@ -64,8 +104,28 @@ struct SetupView: View {
         }
     }
 
+    private var caloriesFooter: String {
+        guard let maintenance = effectiveMaintenance else {
+            return "Fill in About you for an estimate, or type your own numbers."
+        }
+        var text = self.maintenance == nil
+            ? "Estimated maintenance is \(maintenance.formatted()) Cal for your size, age and activity. "
+            : ""
+        switch goal {
+        case .fatLoss:
+            text += "Losing \(rate.rounded1) lb a week takes about \(Int(rate * 500).formatted()) Cal a day off maintenance"
+            text += Double(maintenance) - rate * 500 < floor ? ", held at your \(Int(floor)) Cal floor. " : ". "
+        case .gain:
+            text += "Gaining \(rate.rounded1) lb a week adds about \(Int(rate * 500).formatted()) Cal a day. "
+        case .maintain:
+            break
+        }
+        text += "Type over the grey numbers to use your own. "
+        return text + "Carbs refines maintenance from your logs at each check-in."
+    }
+
     private func save() {
-        guard let weight, let calories else { return }
+        guard let weight, let calories = effectiveCalories else { return }
         let profile = Profile()
         profile.goalType = goal
         profile.goalStartDate = .now
@@ -76,7 +136,11 @@ struct SetupView: View {
         profile.style = style
         profile.calorieFloor = floor
         profile.calories = calories
-        profile.tdeeEstimate = maintenance.map(Double.init)
+        profile.sex = sex
+        profile.age = age
+        profile.heightInches = heightIn ?? 0
+        profile.activity = activity
+        profile.tdeeEstimate = effectiveMaintenance.map(Double.init)
             ?? Double(calories) + (goal == .fatLoss ? rate * 500 : goal == .gain ? -rate * 500 : 0)
         profile.replanMacros(weightLb: weight, bodyFatPct: bodyFat)
         context.insert(profile)
@@ -96,16 +160,23 @@ struct SetupView: View {
         }
     }
 
-    private func intRow(_ title: String, value: Binding<Int?>) -> some View {
+    private func intRow(_ title: String, value: Binding<Int?>, placeholder: Int? = nil, unit: String = "Cal") -> some View {
         HStack {
             Text(title)
             Spacer()
-            TextField("—", value: value, format: .number)
+            TextField(placeholder.map { "\($0)" } ?? "—", value: value, format: .number)
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.trailing)
                 .frame(width: 90)
-            Text("Cal").foregroundStyle(Theme.secondaryText)
+            Text(unit).foregroundStyle(Theme.secondaryText)
         }
+    }
+
+    private func smallField(value: Binding<Int?>) -> some View {
+        TextField("—", value: value, format: .number)
+            .keyboardType(.numberPad)
+            .multilineTextAlignment(.trailing)
+            .frame(width: 36)
     }
 }
 
@@ -133,6 +204,18 @@ struct RateEditor: View {
                     .font(.caption)
                     .foregroundStyle(goal == .fatLoss && percent > 1 ? Theme.carbs : Theme.secondaryText)
             }
+        }
+    }
+}
+
+struct ActivityPicker: View {
+    @Binding var activity: ActivityLevel
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Picker("Activity", selection: $activity) {
+                ForEach(ActivityLevel.allCases) { Text($0.title).tag($0) }
+            }
+            Text(activity.detail).font(.caption).foregroundStyle(Theme.secondaryText)
         }
     }
 }

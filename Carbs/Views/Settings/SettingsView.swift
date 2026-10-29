@@ -5,6 +5,9 @@ struct SettingsView: View {
     @Bindable var profile: Profile
     @Query(sort: \WeightLog.date) private var weights: [WeightLog]
 
+    /// Goal and rate when Settings opened; a new goal offers matching calories.
+    @State private var goalAtOpen: String?
+
     private var latestWeight: Double { weights.last?.pounds ?? profile.startWeight }
     private var latestBodyFat: Double? { weights.last(where: { $0.bodyFatPct != nil })?.bodyFatPct }
 
@@ -30,6 +33,48 @@ struct SettingsView: View {
                         }
                         RateEditor(rate: $profile.rateLbPerWeek, goal: profile.goalType, weight: latestWeight)
                     }
+                    if goalChanged, let goalCalories, goalCalories != profile.calories {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("\(goalCalories) Cal a day fits this goal")
+                                Text("From your \(profile.tdeeEstimate == nil ? "estimated" : "current") maintenance of \(maintenanceBasis ?? 0) Cal")
+                                    .font(.caption).foregroundStyle(Theme.secondaryText)
+                            }
+                            Spacer()
+                            Button("Use") { profile.calories = goalCalories }
+                                .buttonStyle(.borderless)
+                                .fontWeight(.semibold)
+                        }
+                    }
+                }
+
+                Section {
+                    Picker("Sex", selection: $profile.sex) {
+                        Text("—").tag(Sex?.none)
+                        ForEach(Sex.allCases) { Text($0.title).tag(Sex?.some($0)) }
+                    }
+                    HStack {
+                        Text("Age"); Spacer()
+                        TextField("—", value: $profile.age, format: .number).keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing).frame(width: 90)
+                        Text("yr").foregroundStyle(Theme.secondaryText)
+                    }
+                    HStack {
+                        Text("Height"); Spacer()
+                        TextField("—", value: Binding(get: { profile.heightInches > 0 ? profile.heightInches : nil },
+                                                      set: { profile.heightInches = $0 ?? 0 }), format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing).frame(width: 90)
+                        Text("in").foregroundStyle(Theme.secondaryText)
+                    }
+                    ActivityPicker(activity: $profile.activity)
+                    if let stats = profile.statsMaintenance(weightLb: latestWeight, bodyFatPct: latestBodyFat) {
+                        LabeledContent("Estimate from body stats", value: "\(stats) Cal")
+                    }
+                } header: {
+                    Text("About you")
+                } footer: {
+                    Text("Sets a starting maintenance estimate. After check-ins, Carbs uses what your logs show instead.")
                 }
 
                 Section("Coaching") {
@@ -114,7 +159,21 @@ struct SettingsView: View {
             }
             .keyboardDoneButton()
             .navigationTitle("Settings")
+            .onAppear { goalAtOpen = goalKey }
         }
+    }
+
+    /// Logged maintenance once there is one, otherwise the body-stats estimate.
+    private var maintenanceBasis: Int? {
+        profile.tdeeEstimate.map { Int($0.rounded()) } ?? profile.statsMaintenance(weightLb: latestWeight, bodyFatPct: latestBodyFat)
+    }
+
+    private var goalKey: String { "\(profile.goalTypeRaw)|\(profile.rateLbPerWeek)" }
+    private var goalChanged: Bool { goalAtOpen != nil && goalAtOpen != goalKey }
+
+    private var goalCalories: Int? {
+        maintenanceBasis.map { Maintenance.goalCalories(maintenance: Double($0), goal: profile.goalType,
+                                                        rateLbPerWeek: profile.rateLbPerWeek, floor: profile.calorieFloor) }
     }
 
     private func replan() {

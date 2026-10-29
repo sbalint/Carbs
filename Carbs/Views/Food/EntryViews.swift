@@ -27,6 +27,7 @@ struct EntryEditView: View {
                     Section("Amount") {
                         HStack {
                             TextField("1", value: $quantity, format: .number).keyboardType(.decimalPad)
+                                .frame(width: 120, alignment: .leading)
                             Picker("", selection: $servingName) {
                                 ForEach(food.allServings) { Text($0.name).tag($0.name) }
                             }

@@ -23,6 +23,12 @@ struct RootView: View {
                 SetupView()
             }
         }
+        // Tapping a number selects it: type to replace it, or leave it as it was.
+        .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { note in
+            guard let field = note.object as? UITextField,
+                  [.decimalPad, .numberPad].contains(field.keyboardType) else { return }
+            DispatchQueue.main.async { field.selectAll(nil) }
+        }
         #if DEBUG
         .onAppear { DemoData.seedIfNeeded(context) }
         #endif
