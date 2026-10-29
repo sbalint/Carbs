@@ -18,6 +18,7 @@ struct CheckInFlowView: View {
     @State private var otherProtein: Double?
     @State private var weight: Double?
     @State private var bodyFat: Double?
+    @State private var waist: Double?
     @State private var draft: CheckIn?
     @State private var plan: MacroPlan?
     @State private var useOwn = false
@@ -69,6 +70,7 @@ struct CheckInFlowView: View {
             .onAppear {
                 weight = todaysLog?.pounds
                 bodyFat = todaysLog?.bodyFatPct ?? weights.last(where: { $0.bodyFatPct != nil })?.bodyFatPct
+                waist = todaysLog?.waistInches
                 workouts = Int((usualWorkouts ?? 0).rounded())
             }
         }
@@ -141,6 +143,7 @@ struct CheckInFlowView: View {
             VStack(spacing: 12) {
                 numberField("Weight (lb)", $weight)
                 numberField("Body fat % (optional)", $bodyFat)
+                numberField("Waist in (optional)", $waist)
             }
             .card()
             Label("Daily weight swings with water, salt and timing. Weighing in most days lets Carbs see the trend.", systemImage: "lightbulb")
@@ -180,7 +183,7 @@ struct CheckInFlowView: View {
         }
         .task {
             guard !stepsLoaded else { return }
-            await HealthService.shared.requestStepAccess()
+            await HealthService.shared.requestAccess()
             steps = await HealthService.shared.stepSummary(periodStart: period.start, checkIn: today)
             stepsLoaded = true
         }
@@ -201,6 +204,7 @@ struct CheckInFlowView: View {
                 row("Tracking", choice == .everything ? "Complete" : choice == .partial ? "Partial" : choice == .otherApp ? "Other app" : "Not tracked")
                 row("Today's weight", weight.map { "\($0.rounded1) lbs" } ?? "—")
                 row("Body fat", bodyFat.map { "\($0.rounded1)%" } ?? "—")
+                row("Waist", waist.map { "\($0.rounded1) in" } ?? "—")
                 row("Workouts", "\(workouts)")
                 row("Steps", steps.period.map { "\(Int($0.rounded()).formatted()) a day" } ?? "—")
                 row("Adjustment style", profile.style.title)
@@ -319,8 +323,11 @@ struct CheckInFlowView: View {
             if let log = todaysLog {
                 log.pounds = weight
                 log.bodyFatPct = bodyFat
+                log.waistInches = waist
+                // Confirmed by hand now, so later Health imports leave it alone.
+                log.fromHealth = false
             } else {
-                context.insert(WeightLog(date: .now, pounds: weight, bodyFatPct: bodyFat))
+                context.insert(WeightLog(date: .now, pounds: weight, bodyFatPct: bodyFat, waistInches: waist))
             }
         }
         let chosen = useOwn ? (ownCalories ?? draft.suggestedCalories) : draft.suggestedCalories

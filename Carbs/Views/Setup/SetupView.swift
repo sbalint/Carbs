@@ -20,6 +20,7 @@ struct SetupView: View {
     @State private var heightFeet: Int?
     @State private var heightInches: Int?
     @State private var activity: ActivityLevel = .light
+    @State private var healthImport = false
 
     private var heightIn: Double? {
         guard let heightFeet else { return nil }
@@ -44,6 +45,16 @@ struct SetupView: View {
                 Section {
                     Text("Set up your goal. You can change any of this later in Settings.")
                         .foregroundStyle(Theme.secondaryText)
+                }
+                if HealthService.shared.isAvailable {
+                    Section {
+                        Button { Task { await fillFromHealth() } } label: {
+                            Label(healthImport ? "Filled in from Apple Health" : "Fill in from Apple Health",
+                                  systemImage: healthImport ? "checkmark.circle.fill" : "heart.text.square")
+                        }
+                    } footer: {
+                        Text("Uses your latest weight, body fat, height, sex and age from Health, and keeps importing weigh-ins.")
+                    }
                 }
                 Section("Goal") {
                     Picker("Goal", selection: $goal) {
@@ -140,12 +151,28 @@ struct SetupView: View {
         profile.age = age
         profile.heightInches = heightIn ?? 0
         profile.activity = activity
+        profile.healthImport = healthImport
         profile.tdeeEstimate = effectiveMaintenance.map(Double.init)
             ?? Double(calories) + (goal == .fatLoss ? rate * 500 : goal == .gain ? -rate * 500 : 0)
         profile.replanMacros(weightLb: weight, bodyFatPct: bodyFat)
         context.insert(profile)
         context.insert(WeightLog(date: .now, pounds: weight, bodyFatPct: bodyFat))
         try? context.save()
+    }
+
+    private func fillFromHealth() async {
+        await HealthService.shared.requestAccess()
+        let stats = await HealthService.shared.stats()
+        weight = weight ?? stats.pounds.map { ($0 * 10).rounded() / 10 }
+        bodyFat = bodyFat ?? stats.bodyFatPct.map { ($0 * 10).rounded() / 10 }
+        sex = sex ?? stats.sex
+        if age == nil, let year = stats.birthYear { age = Calendar.current.component(.year, from: .now) - year }
+        if heightFeet == nil, let height = stats.heightInches {
+            let total = Int(height.rounded())
+            heightFeet = total / 12
+            heightInches = total % 12
+        }
+        healthImport = true
     }
 
     private func numberRow(_ title: String, value: Binding<Double?>, unit: String) -> some View {

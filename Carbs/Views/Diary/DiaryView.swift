@@ -200,13 +200,8 @@ struct SummaryCard: View {
             .pickerStyle(.segmented)
 
             HStack(spacing: 20) {
-                ZStack {
-                    ring(totals.calories, Double(profile.calories), Theme.primary, 96)
-                    ring(totals.protein, Double(profile.protein), Theme.protein.opacity(0.7), 76)
-                    ring(totals.carbs, Double(profile.carbs), Theme.carbs, 56)
-                    ring(totals.fat, Double(profile.fat), Theme.fat, 36)
-                }
-                .frame(width: 100, height: 100)
+                MacroRings(totals: totals, profile: profile, size: 96, lineWidth: 7)
+                    .frame(width: 100, height: 100)
 
                 Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
                     row("Cal", nil, totals.calories, profile.calories)
@@ -218,18 +213,6 @@ struct SummaryCard: View {
             }
         }
         .card()
-    }
-
-    private func ring(_ value: Double, _ target: Double, _ color: Color, _ size: CGFloat) -> some View {
-        let fraction = target > 0 ? value / target : 0
-        return ZStack {
-            Circle().stroke(color.opacity(0.15), lineWidth: 7)
-            Circle()
-                .trim(from: 0, to: min(1, fraction))
-                .stroke(fraction > 1.03 ? Theme.error : color, style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-        }
-        .frame(width: size, height: size)
     }
 
     private func row(_ name: String, _ color: Color?, _ value: Double, _ target: Int) -> some View {
@@ -247,5 +230,38 @@ struct SummaryCard: View {
             Text("\(target)").monospacedDigit().foregroundStyle(Theme.secondaryText)
                 .gridColumnAlignment(.trailing)
         }
+    }
+}
+
+/// Concentric calorie, protein, carbs and fat rings. A ring turns red once it's over target.
+struct MacroRings: View {
+    let totals: DayTotals?
+    let profile: Profile
+    let size: CGFloat
+    let lineWidth: CGFloat
+    /// Overrides the calorie ring's color, e.g. to show compliance.
+    var calorieColor: Color? = nil
+
+    var body: some View {
+        // Ring centers sit 20 pt apart at the Diary's 7 pt line; scale that for thinner rings.
+        let step = lineWidth * 20 / 7
+        ZStack {
+            ring(totals?.calories ?? 0, Double(profile.calories), calorieColor ?? Theme.primary, size, colorIsSet: calorieColor != nil)
+            ring(totals?.protein ?? 0, Double(profile.protein), Theme.protein.opacity(0.7), size - step)
+            ring(totals?.carbs ?? 0, Double(profile.carbs), Theme.carbs, size - step * 2)
+            ring(totals?.fat ?? 0, Double(profile.fat), Theme.fat, size - step * 3)
+        }
+    }
+
+    private func ring(_ value: Double, _ target: Double, _ color: Color, _ size: CGFloat, colorIsSet: Bool = false) -> some View {
+        let fraction = target > 0 ? value / target : 0
+        return ZStack {
+            Circle().stroke(color.opacity(0.15), lineWidth: lineWidth)
+            Circle()
+                .trim(from: 0, to: min(1, fraction))
+                .stroke(fraction > 1.03 && !colorIsSet ? Theme.error : color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+        }
+        .frame(width: size, height: size)
     }
 }

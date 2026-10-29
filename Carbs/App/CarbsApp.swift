@@ -13,6 +13,7 @@ struct CarbsApp: App {
 
 struct RootView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.scenePhase) private var scenePhase
     @Query private var profiles: [Profile]
 
     var body: some View {
@@ -29,9 +30,17 @@ struct RootView: View {
                   [.decimalPad, .numberPad].contains(field.keyboardType) else { return }
             DispatchQueue.main.async { field.selectAll(nil) }
         }
+        // Pull new weigh-ins from Apple Health when it's turned on and each time the app comes forward.
+        .task(id: profiles.first?.healthImport) { await importHealth() }
+        .onChange(of: scenePhase) { if scenePhase == .active { Task { await importHealth() } } }
         #if DEBUG
         .onAppear { DemoData.seedIfNeeded(context) }
         #endif
+    }
+
+    private func importHealth() async {
+        guard let profile = profiles.first else { return }
+        await HealthImport.run(profile: profile, context: context)
     }
 }
 

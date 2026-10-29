@@ -32,7 +32,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Carbs uses the camera to scan food barcodes.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Carbs reads your step count to fine-tune weekly calorie suggestions.</string>
+	<string>Carbs reads your weight, body fat, waist, height and steps to track your progress and fine-tune calorie suggestions.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

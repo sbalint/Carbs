@@ -77,6 +77,17 @@ struct SettingsView: View {
                     Text("Sets a starting maintenance estimate. After check-ins, Carbs uses what your logs show instead.")
                 }
 
+                Section {
+                    Toggle("Import from Apple Health", isOn: $profile.healthImport)
+                    if profile.healthImport, let last = profile.healthImportedAt {
+                        LabeledContent("Last import", value: last.formatted(date: .abbreviated, time: .shortened))
+                    }
+                } header: {
+                    Text("Apple Health")
+                } footer: {
+                    Text("Brings in weight, body fat and waist each time you open Carbs. Anything you type in Carbs is kept. Carbs never writes to Apple Health. To change what Carbs can read, use the Health app: Profile › Apps › Carbs.")
+                }
+
                 Section("Coaching") {
                     WeekdayPicker(weekday: $profile.checkInWeekday)
                     StylePicker(style: $profile.style)
