@@ -43,6 +43,8 @@
 	<string>Carbs uses the camera to scan food barcodes.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Carbs reads your weight, body fat, waist, height and steps to track your progress and fine-tune calorie suggestions.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Carbs only reads from Apple Health to track your progress. It never writes or changes your Health data.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

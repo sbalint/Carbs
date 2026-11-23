@@ -10,7 +10,7 @@ settings:
     SWIFT_VERSION: "5.0"
     # Raise CURRENT_PROJECT_VERSION for every TestFlight upload; App Store Connect rejects a repeat.
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "2"
+    CURRENT_PROJECT_VERSION: "3"
 targets:
   Carbs:
     type: application
@@ -33,6 +33,8 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSCameraUsageDescription: Carbs uses the camera to scan food barcodes.
         NSHealthShareUsageDescription: Carbs reads your weight, body fat, waist, height and steps to track your progress and fine-tune calorie suggestions.
+        # Required by App Store Connect for any HealthKit app, even one that only reads.
+        NSHealthUpdateUsageDescription: Carbs only reads from Apple Health to track your progress. It never writes or changes your Health data.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
         FatSecretProxyURL: $(FATSECRET_PROXY_URL)
