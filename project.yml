@@ -8,8 +8,9 @@ settings:
   base:
     DEVELOPMENT_TEAM: W8BGT53U8Q
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.1.0"
-    CURRENT_PROJECT_VERSION: "1"
+    # Raise CURRENT_PROJECT_VERSION for every TestFlight upload; App Store Connect rejects a repeat.
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "2"
 targets:
   Carbs:
     type: application
@@ -24,6 +25,10 @@ targets:
       path: Carbs/Info.plist
       properties:
         CFBundleDisplayName: Carbs
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Only standard HTTPS, so no export compliance questions on each upload.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSCameraUsageDescription: Carbs uses the camera to scan food barcodes.
