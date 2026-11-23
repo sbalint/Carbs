@@ -46,7 +46,11 @@ struct RootView: View {
 
 struct MainTabView: View {
     @Bindable var profile: Profile
+    @Environment(\.scenePhase) private var scenePhase
     @State private var tab = 0
+    /// The tabs are rebuilt when this changes, so opening the app in the morning shows today
+    /// rather than the day it was last left on.
+    @State private var day = Date.now.startOfDay
 
     var body: some View {
         TabView(selection: $tab) {
@@ -58,6 +62,12 @@ struct MainTabView: View {
                 .tabItem { Label("Me", systemImage: "person") }.tag(2)
             SettingsView(profile: profile)
                 .tabItem { Label("Settings", systemImage: "gearshape") }.tag(3)
+        }
+        .id(day)
+        .onChange(of: scenePhase) { if scenePhase == .active { day = Date.now.startOfDay } }
+        // Midnight passing while the app is open.
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
+            day = Date.now.startOfDay
         }
         #if DEBUG
         .onAppear { tab = DemoData.initialTab }
