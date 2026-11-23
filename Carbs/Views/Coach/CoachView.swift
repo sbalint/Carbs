@@ -50,24 +50,34 @@ struct CoachView: View {
                 ForEach(period.days, id: \.self) { day in
                     let t = byDay[day]
                     VStack(spacing: 4) {
-                        ZStack {
-                            Circle().stroke(Theme.primary.opacity(0.15), lineWidth: 5)
-                            Circle()
-                                .trim(from: 0, to: min(1, (t?.calories ?? 0) / Double(max(1, profile.calories))))
-                                .stroke(color(for: t), style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                                .rotationEffect(.degrees(-90))
-                        }
-                        .frame(width: 34, height: 34)
+                        MacroRings(totals: t, profile: profile, size: 42, lineWidth: 3.5, calorieColor: color(for: t))
+                            .frame(width: 42, height: 42)
                         Text(day.formatted(.dateTime.day())).font(.caption2.weight(.semibold))
                         Text(day.formatted(.dateTime.weekday(.abbreviated))).font(.caption2).foregroundStyle(Theme.secondaryText)
                     }
                     .frame(maxWidth: .infinity)
                 }
             }
+            HStack(spacing: 12) {
+                legend("Cal", Theme.primary)
+                legend("Protein", Theme.protein.opacity(0.7))
+                legend("Carbs", Theme.carbs)
+                legend("Fat", Theme.fat)
+            }
+            .font(.caption2)
+            .foregroundStyle(Theme.secondaryText)
+            .frame(maxWidth: .infinity)
             Button(period.isDue() ? "Check in" : "Check in early") { checkingIn = true }
                 .buttonStyle(PrimaryButtonStyle())
         }
         .card()
+    }
+
+    private func legend(_ name: String, _ color: Color) -> some View {
+        HStack(spacing: 4) {
+            Circle().fill(color).frame(width: 7, height: 7)
+            Text(name)
+        }
     }
 
     private func color(for totals: DayTotals?) -> Color {

@@ -142,12 +142,17 @@ final class WeightLog {
     var date: Date = Date.now
     var pounds: Double = 0
     var bodyFatPct: Double?
+    var waistInches: Double?
     var note: String?
+    /// Imported from Apple Health. Later imports may update it; logs typed in Carbs are never overwritten.
+    var fromHealth: Bool = false
 
-    init(date: Date, pounds: Double, bodyFatPct: Double? = nil) {
+    init(date: Date, pounds: Double, bodyFatPct: Double? = nil, waistInches: Double? = nil, fromHealth: Bool = false) {
         self.date = date
         self.pounds = pounds
         self.bodyFatPct = bodyFatPct
+        self.waistInches = waistInches
+        self.fromHealth = fromHealth
     }
 }
 
@@ -221,8 +226,34 @@ final class Profile {
     var compliantStreak: Int = 0
     var mealNames: [String] = ["Breakfast", "Lunch", "Dinner", "Snack"]
     var usdaAPIKey: String = ""
+    var sexRaw: String = ""
+    var birthYear: Int = 0
+    var heightInches: Double = 0
+    var activityRaw: String = ActivityLevel.light.rawValue
+    var healthImport: Bool = false
+    var healthImportedAt: Date?
 
     init() {}
+
+    var sex: Sex? {
+        get { Sex(rawValue: sexRaw) }
+        set { sexRaw = newValue?.rawValue ?? "" }
+    }
+    var activity: ActivityLevel {
+        get { ActivityLevel(rawValue: activityRaw) ?? .light }
+        set { activityRaw = newValue.rawValue }
+    }
+    var age: Int? {
+        get { birthYear > 0 ? Calendar.current.component(.year, from: .now) - birthYear : nil }
+        set { birthYear = newValue.map { Calendar.current.component(.year, from: .now) - $0 } ?? 0 }
+    }
+
+    /// Maintenance from body stats, or nil until sex, age and height are filled in.
+    func statsMaintenance(weightLb: Double, bodyFatPct: Double?) -> Int? {
+        guard let sex, let age, heightInches > 0, weightLb > 0 else { return nil }
+        return Maintenance.estimate(weightLb: weightLb, heightIn: heightInches, age: age, sex: sex,
+                                    activity: activity, bodyFatPct: bodyFatPct)
+    }
 
     var goalType: GoalType {
         get { GoalType(rawValue: goalTypeRaw) ?? .fatLoss }

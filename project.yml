@@ -27,7 +27,7 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSCameraUsageDescription: Carbs uses the camera to scan food barcodes.
-        NSHealthShareUsageDescription: Carbs reads your step count to fine-tune weekly calorie suggestions.
+        NSHealthShareUsageDescription: Carbs reads your weight, body fat, waist, height and steps to track your progress and fine-tune calorie suggestions.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
         FatSecretProxyURL: $(FATSECRET_PROXY_URL)

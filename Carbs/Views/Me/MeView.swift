@@ -23,6 +23,12 @@ struct MeView: View {
                     }
                     .pickerStyle(.segmented)
                     weightCard
+                    if weights.contains(where: { $0.bodyFatPct != nil }) {
+                        measurementCard("Body fat", unit: "%", color: Theme.fat, values: weights.compactMap { w in w.bodyFatPct.map { (w.date, $0) } })
+                    }
+                    if weights.contains(where: { $0.waistInches != nil }) {
+                        measurementCard("Waist", unit: "in", color: Theme.carbs, values: weights.compactMap { w in w.waistInches.map { (w.date, $0) } })
+                    }
                     caloriesCard
                     if checkIns.contains(where: { $0.tdeeEstimate != nil }) { maintenanceCard }
                     weighInList
@@ -78,6 +84,40 @@ struct MeView: View {
         .card()
     }
 
+    private func measurementCard(_ title: String, unit: String, color: Color, values: [(date: Date, value: Double)]) -> some View {
+        let shown = values.filter { $0.date >= start }
+        let low = (shown.map(\.value).min() ?? 0) - 1, high = (shown.map(\.value).max() ?? 0) + 1
+        let space = unit == "%" ? "" : " "
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(title).font(.headline)
+                Spacer()
+                if let last = values.last {
+                    Text(last.value.rounded1 + space + unit).font(.subheadline).foregroundStyle(Theme.secondaryText)
+                }
+            }
+            if shown.isEmpty {
+                Text("None in this range.").foregroundStyle(Theme.secondaryText)
+            } else {
+                Chart(shown, id: \.date) { p in
+                    LineMark(x: .value("Date", p.date), y: .value(title, p.value))
+                        .foregroundStyle(color)
+                    PointMark(x: .value("Date", p.date), y: .value(title, p.value))
+                        .foregroundStyle(color)
+                        .symbolSize(24)
+                }
+                .chartYScale(domain: low...high)
+                .frame(height: 140)
+                if let first = shown.first, let last = shown.last, shown.count > 1 {
+                    Text(String(format: "%+.1f%@%@ since %@", last.value - first.value, space, unit,
+                                first.date.formatted(.dateTime.month(.abbreviated).day())))
+                        .font(.caption).foregroundStyle(Theme.secondaryText)
+                }
+            }
+        }
+        .card()
+    }
+
     private var caloriesCard: some View {
         let byDay = DayTotals.byDay(entries.filter { $0.timestamp >= start })
         let days = byDay.sorted { $0.key < $1.key }
@@ -127,7 +167,12 @@ struct MeView: View {
             ForEach(weights.reversed().prefix(30)) { w in
                 HStack {
                     Text(w.date.formatted(date: .abbreviated, time: .omitted))
+                    if w.fromHealth {
+                        Image(systemName: "heart.fill").font(.caption2).foregroundStyle(.pink)
+                            .accessibilityLabel("From Apple Health")
+                    }
                     Spacer()
+                    if let waist = w.waistInches { Text("\(waist.rounded1) in").foregroundStyle(Theme.secondaryText) }
                     if let bf = w.bodyFatPct { Text("\(bf.rounded1)%").foregroundStyle(Theme.secondaryText) }
                     Text("\(w.pounds.rounded1) lb").monospacedDigit()
                 }
@@ -148,6 +193,7 @@ struct AddWeightView: View {
     @State private var date = Date.now
     @State private var pounds: Double?
     @State private var bodyFat: Double?
+    @State private var waist: Double?
 
     var body: some View {
         NavigationStack {
@@ -155,6 +201,7 @@ struct AddWeightView: View {
                 DatePicker("Date", selection: $date, displayedComponents: .date)
                 numberField("Weight (lb)", $pounds)
                 numberField("Body fat % (optional)", $bodyFat)
+                numberField("Waist in (optional)", $waist)
             }
             .keyboardDoneButton()
             .navigationTitle("Add weight")
@@ -164,7 +211,7 @@ struct AddWeightView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         if let pounds {
-                            context.insert(WeightLog(date: date, pounds: pounds, bodyFatPct: bodyFat))
+                            context.insert(WeightLog(date: date, pounds: pounds, bodyFatPct: bodyFat, waistInches: waist))
                             try? context.save()
                         }
                         dismiss()

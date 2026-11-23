@@ -31,7 +31,8 @@ enum DemoData {
         for d in 0..<21 {
             let w = 222.5 - Double(d) * 0.13 + (d % 3 == 0 ? 0.6 : d % 3 == 1 ? -0.3 : 0)
             context.insert(WeightLog(date: today.adding(days: -20 + d).addingTimeInterval(7 * 3600), pounds: w,
-                                     bodyFatPct: d == 20 ? 25 : nil))
+                                     bodyFatPct: d % 4 == 0 ? 26 - Double(d) * 0.05 : nil,
+                                     waistInches: d % 7 == 6 ? 41 - Double(d) * 0.04 : nil, fromHealth: d % 2 == 0))
         }
 
         let shake = Food(name: "Protein Isolate", brand: "Demo", caloriesPer100g: 375, proteinPer100g: 75,
